@@ -2,30 +2,70 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>シューティングゲーム</title>
   <style>
-    body { margin: 0; overflow: hidden; background: linear-gradient(135deg, #1e1e1e, #3a3a3a); color: #fff; font-family: sans-serif; }
-    #settings, #gameOver { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px; text-align: center; }
+    /* ページ全体をフルスクリーンに */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1e1e1e, #3a3a3a);
+      color: #fff;
+      font-family: sans-serif;
+    }
+    /* キャンバスを画面いっぱいに */
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      cursor: none; /* デフォルトカーソルを消す */
+      background: #111;
+    }
+    /* 設定＆結果パネル */
+    #settings, #gameOver {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+    }
     #gameOver { display: none; }
-    canvas { display: block; background: #111; }
-    button { margin-top: 10px; padding: 8px 16px; font-size: 16px; }
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    select, input[type=number] {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
+  <!-- 設定画面 -->
   <div id="settings">
     <h2>設定</h2>
-    <label>ターゲットサイズ:
+    <label>ターゲットサイズ（px）:
       <select id="sizeSelect">
-        <option value="3">3px</option>
-        <option value="8">8px</option>
-        <option value="12">12px</option>
-        <option value="16">16px</option>
-        <option value="20" selected>20px</option>
+        <option value="3">3</option>
+        <option value="8">8</option>
+        <option value="12">12</option>
+        <option value="16">16</option>
+        <option value="20" selected>20</option>
       </select>
-    </label><br>
+    </label>
     <label>感度 (0.01〜1.00):
       <input type="number" id="sensitivityInput" min="0.01" max="1.00" step="0.01" value="1.00">
-    </label><br>
+    </label>
     <label>出現範囲:
       <select id="rangeSelect">
         <option value="0.2">狭い</option>
@@ -34,12 +74,14 @@
         <option value="0.8">やや広い</option>
         <option value="1.0">広い</option>
       </select>
-    </label><br>
+    </label>
     <button id="startBtn">スタート</button>
   </div>
 
+  <!-- ゲームキャンバス -->
   <canvas id="gameCanvas"></canvas>
 
+  <!-- 結果画面 -->
   <div id="gameOver">
     <h2>ゲーム終了</h2>
     <div id="scoreList"></div>
@@ -57,58 +99,63 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // 設定 UI
+    // UI要素
     const settings = document.getElementById('settings');
     const startBtn = document.getElementById('startBtn');
     const sizeSelect = document.getElementById('sizeSelect');
     const sensitivityInput = document.getElementById('sensitivityInput');
     const rangeSelect = document.getElementById('rangeSelect');
-
-    // ゲームオーバー UI
     const gameOverDiv = document.getElementById('gameOver');
     const scoreListDiv = document.getElementById('scoreList');
     const backBtn = document.getElementById('backBtn');
 
+    // ゲーム変数
     let targetSize, sensitivity, spawnRange;
     let startTime, timeLimit = 20;
     let score, mouse = { x: 0, y: 0 };
+    let targetX, targetY;
 
+    // localStorage操作
     function loadHighScores() {
       const data = localStorage.getItem('highScores');
       return data ? JSON.parse(data) : [];
     }
-
     function saveHighScores(scores) {
       localStorage.setItem('highScores', JSON.stringify(scores));
     }
-
     function showHighScores() {
       const hs = loadHighScores();
-      if (hs.length === 0) {
+      if (!hs.length) {
         scoreListDiv.innerHTML = '<p>ハイスコアはまだありません。</p>';
-      } else {
-        const ul = document.createElement('ol');
-        hs.forEach(item => {
-          const li = document.createElement('li');
-          li.textContent = `${item.score} - ${new Date(item.time).toLocaleString()}`;
-          ul.appendChild(li);
-        });
-        scoreListDiv.innerHTML = '';
-        scoreListDiv.appendChild(ul);
+        return;
       }
+      const ul = document.createElement('ol');
+      hs.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.score} - ${new Date(item.time).toLocaleString()}`;
+        ul.appendChild(li);
+      });
+      scoreListDiv.innerHTML = '';
+      scoreListDiv.appendChild(ul);
+    }
+
+    // ターゲットを１箇所に生成
+    function spawnTarget() {
+      targetX = Math.random() * width * spawnRange + (width * (1 - spawnRange) / 2);
+      targetY = Math.random() * height * spawnRange + (height * (1 - spawnRange) / 2);
     }
 
     function gameOver() {
-      // ハイスコア更新
+      // スコア登録
       const hs = loadHighScores();
       hs.push({ score, time: Date.now() });
       hs.sort((a, b) => b.score - a.score);
       if (hs.length > 10) hs.length = 10;
       saveHighScores(hs);
 
-      // 結果表示
-      settings.style.display = 'none';
+      // 画面切り替え
       canvas.style.display = 'none';
+      settings.style.display = 'none';
       showHighScores();
       gameOverDiv.style.display = 'block';
     }
@@ -120,60 +167,57 @@
 
     startBtn.addEventListener('click', () => {
       // 設定読み込み
-      targetSize = parseInt(sizeSelect.value, 10);
-      sensitivity = parseFloat(sensitivityInput.value);
-      spawnRange = parseFloat(rangeSelect.value);
+      targetSize = +sizeSelect.value;
+      sensitivity = +sensitivityInput.value;
+      spawnRange = +rangeSelect.value;
 
       // 初期化
       score = 0;
       mouse = { x: width/2, y: height/2 };
       startTime = performance.now();
+      spawnTarget();
       settings.style.display = 'none';
       canvas.style.display = 'block';
       requestAnimationFrame(loop);
     });
 
     canvas.addEventListener('mousemove', e => {
-      // 感度制御
       mouse.x += (e.clientX - mouse.x) * sensitivity;
       mouse.y += (e.clientY - mouse.y) * sensitivity;
     });
 
     function loop(now) {
       const elapsed = (now - startTime) / 1000;
-      if (elapsed >= timeLimit) {
-        return gameOver();
-      }
+      if (elapsed >= timeLimit) return gameOver();
 
       // 背景
       ctx.fillStyle = '#111';
       ctx.fillRect(0, 0, width, height);
 
       // ターゲット描画
-      const x = Math.random() * width * spawnRange + (width*(1-spawnRange)/2);
-      const y = Math.random() * height * spawnRange + (height*(1-spawnRange)/2);
       ctx.strokeStyle = '#0f0';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(x, y, targetSize, 0, Math.PI*2);
+      ctx.arc(targetX, targetY, targetSize, 0, Math.PI*2);
       ctx.stroke();
 
-      // 判定
-      if (Math.hypot(mouse.x - x, mouse.y - y) <= targetSize) {
+      // ヒット判定：ヒットしたらスコア＋次のスポーン
+      if (Math.hypot(mouse.x - targetX, mouse.y - targetY) <= targetSize) {
         score++;
+        spawnTarget();
       }
 
-      // クロスカーソル
+      // クロスカーソル描画
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(mouse.x - 10, mouse.y);
       ctx.lineTo(mouse.x + 10, mouse.y);
       ctx.moveTo(mouse.x, mouse.y - 10);
       ctx.lineTo(mouse.x, mouse.y + 10);
-      ctx.strokeStyle = '#f00';
-      ctx.lineWidth = 2;
       ctx.stroke();
 
-      // スコアと残り時間
+      // HUD
       ctx.fillStyle = '#fff';
       ctx.font = '20px sans-serif';
       ctx.fillText(`Score: ${score}`, 10, 30);
