@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>シューティングゲーム ver.1.1</title>
+  <title>シューティングゲーム ver.1.2</title>
   <style>
     html, body {
       margin: 0; padding: 0;
@@ -26,8 +26,9 @@
       width: 100%; box-sizing: border-box;
       margin: 5px 0 15px; padding: 5px; font-size: 16px;
     }
+    label { display: block; text-align: left; margin-top: 10px; }
     button {
-      padding: 8px 16px; font-size: 16px; cursor: pointer;
+      margin-top: 15px; padding: 8px 16px; font-size: 16px; cursor: pointer;
     }
   </style>
 </head>
@@ -55,6 +56,19 @@
         <option value="1.0">広い</option>
       </select>
     </label>
+    <label>カーソル色：
+      <select id="cursorColorSelect">
+        <option value="red">赤</option>
+        <option value="white">白</option>
+        <option value="blue">青</option>
+        <option value="yellow">黄色</option>
+        <option value="purple">紫</option>
+        <option value="lime">緑</option>
+      </select>
+    </label>
+    <label>補助：
+      <input type="checkbox" id="assistCheckbox"> 的とカーソルを直線で結ぶ
+    </label>
     <button id="startBtn">スタート</button>
   </div>
 
@@ -74,16 +88,21 @@
     const sizeSelect = document.getElementById('sizeSelect');
     const sensitivityInput = document.getElementById('sensitivityInput');
     const rangeSelect = document.getElementById('rangeSelect');
+    const cursorColorSelect = document.getElementById('cursorColorSelect');
+    const assistCheckbox = document.getElementById('assistCheckbox');
     const gameOverDiv = document.getElementById('gameOver');
     const scoreListDiv = document.getElementById('scoreList');
     const backBtn = document.getElementById('backBtn');
 
     let width, height;
-    function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
     window.addEventListener('resize', resize);
     resize();
 
-    let targetSize, sensitivity, spawnRange;
+    let targetSize, sensitivity, spawnRange, cursorColor;
     const timeLimit = 20;
     let score, startTime, mouse, targetX, targetY;
 
@@ -130,9 +149,10 @@
       targetSize  = parseInt(sizeSelect.value, 10);
       sensitivity = parseFloat(sensitivityInput.value);
       spawnRange  = parseFloat(rangeSelect.value);
-      score     = 0;
-      mouse     = { x: width/2, y: height/2 };
-      startTime = performance.now();
+      cursorColor = cursorColorSelect.value;
+      score      = 0;
+      mouse      = { x: width/2, y: height/2 };
+      startTime  = performance.now();
       spawnTarget();
       settings.style.display    = 'none';
       gameOverDiv.style.display = 'none';
@@ -146,7 +166,8 @@
     });
 
     canvas.addEventListener('click', e => {
-      if (performance.now() - startTime >= timeLimit * 1000) return;
+      const elapsed = (performance.now() - startTime) / 1000;
+      if (elapsed >= timeLimit) return;
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
@@ -166,16 +187,42 @@
       if (elapsed >= timeLimit) return gameOver();
       ctx.fillStyle = '#111';
       ctx.fillRect(0, 0, width, height);
-      ctx.strokeStyle = '#0f0'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(targetX, targetY, targetSize, 0, Math.PI*2); ctx.stroke();
-      ctx.strokeStyle = '#f00'; ctx.lineWidth = 2;
+      // ターゲット描画
+      ctx.fillStyle = '#e63946';
+      ctx.beginPath();
+      ctx.arc(targetX, targetY, targetSize, 0, Math.PI*2);
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(targetX, targetY, targetSize, 0, Math.PI*2);
+      ctx.stroke();
+      // 中央白丸(直径3px)
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(targetX, targetY, 1.5, 0, Math.PI*2);
+      ctx.fill();
+      // 補助線
+      if (assistCheckbox.checked) {
+        ctx.strokeStyle = cursorColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(targetX, targetY);
+        ctx.lineTo(mouse.x, mouse.y);
+        ctx.stroke();
+      }
+      // クロスカーソル
+      ctx.strokeStyle = cursorColor;
+      ctx.lineWidth   = 2;
       ctx.beginPath();
       ctx.moveTo(mouse.x - 10, mouse.y);
       ctx.lineTo(mouse.x + 10, mouse.y);
       ctx.moveTo(mouse.x, mouse.y - 10);
       ctx.lineTo(mouse.x, mouse.y + 10);
       ctx.stroke();
-      ctx.fillStyle = '#fff'; ctx.font = '20px sans-serif';
+      // HUD
+      ctx.fillStyle = '#fff';
+      ctx.font      = '20px sans-serif';
       ctx.fillText(`Score: ${score}`, 10, 30);
       ctx.fillText(`Time: ${(timeLimit - elapsed).toFixed(1)}s`, 10, 60);
       requestAnimationFrame(loop);
