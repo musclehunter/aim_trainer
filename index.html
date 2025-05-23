@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シューティングゲーム</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="settings">
+    <h2 id="labelSettings"></h2>
+    <label><input type="checkbox" id="loadPrev"> <span id="labelLoadPrev"></span></label>
+    <label><span id="labelSize"></span>
+      <select id="sizeSelect"></select>
+    </label>
+    <label><span id="labelSensitivity"></span>
+      <input type="number" id="sensitivityInput" min="0.01" max="1.00" step="0.01">
+    </label>
+    <label><span id="labelRange"></span>
+      <select id="rangeSelect"></select>
+    </label>
+    <label><span id="labelCursorColor"></span>
+      <select id="cursorColorSelect"></select>
+    </label>
+    <label><input type="checkbox" id="assistCheckbox"> <span id="labelAssist"></span></label>
+    <label><span id="labelLangLabel">Language</span>
+      <select id="langSelect"><option value="ja">日本語</option><option value="en">English</option><option value="es">Español</option><option value="zh">中文</option><option value="pt">Português</option></select>
+    </label>
+    <button id="startBtn"></button>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="gameOver">
+    <h2 id="labelGameOver"></h2>
+    <div class="results-container">
+      <div class="table-container">
+        <table id="scoreTable">
+          <thead>
+            <tr>
+              <th id="labelRank"></th>
+              <th id="labelScore"></th>
+              <th id="labelAvgTime"></th>
+              <th id="labelMisses"></th>
+              <th id="labelHitRate"></th>
+              <th id="labelDate"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="detail-container" id="detailView">
+        <p id="labelClickRow"></p>
+      </div>
+    </div>
+    <button id="backBtn"></button>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="scripts.js"></script>
+
+</body>
+</html>
