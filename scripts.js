@@ -215,6 +215,16 @@ langSelect.addEventListener('change', () => {
   populateOptions(newLang);
   translateUI(newLang);
   updateStorageInfo();
+
+  // 保存されている設定を再適用
+  const cfg = loadConfig();
+  if (cfg) {
+    sizeSelect.value = cfg.size;
+    sensitivityInput.value = cfg.sensitivity;
+    rangeSelect.value = cfg.range;
+    cursorColorSelect.value = cfg.cursorColor;
+    assistCheckbox.checked = cfg.assist;
+  }
 });
 
 // Canvas リサイズ
