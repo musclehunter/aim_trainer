@@ -346,7 +346,7 @@ function gameOver() {
   console.log('ランキング表示:', hs.length, '件');
   hs.forEach((e, i) => {
     const tr = document.createElement('tr');
-    if (i === rank) tr.style.background = '#444';
+    if (i === rank) tr.classList.add('current-score');
     tr.innerHTML =
       `<td>${i+1}</td><td>${e.score}</td><td>${e.avgTime.toFixed(2)}</td>` +
       `<td>${e.misses}</td><td>${e.hitRate.toFixed(1)}</td>` +

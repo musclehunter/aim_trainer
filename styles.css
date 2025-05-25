@@ -162,6 +162,29 @@ button.danger:hover {
   align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-color: rgba(76, 175, 80, 0.3);
+  }
+  50% {
+    background-color: rgba(76, 175, 80, 0.2);
+    border-color: rgba(76, 175, 80, 0.6);
+  }
+  100% {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-color: rgba(76, 175, 80, 0.3);
+  }
+}
+
+.current-score {
+  background-color: rgba(76, 175, 80, 0.1);
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  animation: highlight-pulse 2s ease-in-out infinite;
+  font-weight: bold;
 }
 
 .storage-item:last-child {
