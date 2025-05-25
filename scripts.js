@@ -42,7 +42,18 @@ function loadConfig() {
 }
 
 // 初期化処理
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+  // バージョン情報の読み込み
+  let version = 'dev';
+  try {
+    version = await fetch('version.txt').then(r => r.text());
+    version = version.trim();
+    document.title = `Aim Trainer v${version}`;
+    document.getElementById('version').textContent = `v${version}`;
+  } catch (e) {
+    console.warn('バージョン情報の読み込みに失敗しました', e);
+  }
+
   const cfg = loadConfig() || DEFAULTS;
   // 多言語化初期化
   langSelect.value = cfg.lang;
