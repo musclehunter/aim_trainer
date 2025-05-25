@@ -1,0 +1,48 @@
+{
+  "project": {
+    "name": "Aim Trainer",
+    "type": "web",
+    "defaultLanguage": "auto",
+    "supportedLanguages": [
+      {
+        "code": "ja",
+        "name": "日本語"
+      },
+      {
+        "code": "en",
+        "name": "English"
+      },
+      {
+        "code": "es",
+        "name": "Español"
+      },
+      {
+        "code": "zh",
+        "name": "中文"
+      },
+      {
+        "code": "pt",
+        "name": "Português"
+      }
+    ],
+    "guidelines": {
+      "html": "docs/guidelines/html.md",
+      "css": "docs/guidelines/css.md",
+      "javascript": "docs/guidelines/js.md",
+      "i18n": "docs/guidelines/i18n.md"
+    },
+    "structure": {
+      "docs": {
+        "guidelines": "コーディングガイドライン",
+        "architecture": "アーキテクチャ設計",
+        "features": "機能仕様"
+      },
+      "bgm": "音楽ファイル",
+      "scripts.js": "JavaScriptメインファイル",
+      "i18n.js": "多言語化ファイル",
+      "styles.css": "CSSスタイルファイル",
+      "index.html": "メインHTMLファイル",
+      "version.js": "バージョン情報"
+    }
+  }
+}
