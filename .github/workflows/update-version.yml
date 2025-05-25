@@ -1,0 +1,35 @@
+name: Update Version
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+
+jobs:
+  update-version:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Update version.txt
+        run: |
+          DATE=$(date '+%Y%m%d')
+          COUNT=$(git rev-list --count HEAD)
+          echo "${DATE}.${COUNT}" > version.txt
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add version.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update version [skip ci]" && git push)
