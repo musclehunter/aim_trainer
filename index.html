@@ -22,30 +22,63 @@
 </head>
 <body>
   <div id="settings">
-    <h2 id="labelSettings"></h2>
-    <label><span id="labelSize"></span>
-      <select id="sizeSelect"></select>
-    </label>
-    <label><span id="labelSensitivity"></span>
-      <input type="number" id="sensitivityInput" min="0.01" max="1.00" step="0.01">
-    </label>
-    <label><span id="labelRange"></span>
-      <select id="rangeSelect"></select>
-    </label>
-    <label><span id="labelCursorColor"></span>
-      <select id="cursorColorSelect"></select>
-    </label>
-    <label><input type="checkbox" id="assistCheckbox"> <span id="labelAssist"></span></label>
-    <label><span id="labelLangLabel">Language</span>
-      <select id="langSelect"><option value="ja">日本語</option><option value="en">English</option><option value="es">Español</option><option value="zh">中文</option><option value="pt">Português</option></select>
-    </label>
-    <button id="startBtn"></button>
+    <div class="settings-container">
+      <div class="settings-main">
+        <h2 id="labelSettings"></h2>
+        <label><span id="labelSize"></span>
+          <select id="sizeSelect" data-list="true"></select>
+        </label>
+        <label><span id="labelSensitivity"></span>
+          <input type="number" id="sensitivityInput" min="0.01" max="1.00" step="0.01">
+        </label>
+        <label><span id="labelRange"></span>
+          <select id="rangeSelect" data-list="true"></select>
+        </label>
+        <label><span id="labelCursorColor"></span>
+          <select id="cursorColorSelect" data-list="true"></select>
+        </label>
+        <label><input type="checkbox" id="assistCheckbox"> <span id="labelAssist"></span></label>
+        <label><span id="labelLangLabel">Language</span>
+          <select id="langSelect" data-list="true"><option value="ja">日本語</option><option value="en">English</option><option value="es">Español</option><option value="zh">中文</option><option value="pt">Português</option></select>
+        </label>
+        <div class="form-group">
+          <button id="startBtn"></button>
+        </div>
+      </div>
+      <div class="settings-side">
+        <div class="form-group danger-zone">
+          <h3 id="labelStorageHeader"></h3>
+          <p id="labelStorageExplain"></p>
+          <div class="storage-info">
+            <div class="storage-item">
+              <span id="labelStorageRanking"></span>
+              <span id="rankingSize">0 KB</span>
+            </div>
+            <div class="storage-item">
+              <span id="labelStorageConfig"></span>
+              <span id="configSize">0 KB</span>
+            </div>
+            <div class="storage-item total">
+              <span id="labelStorageTotal"></span>
+              <span id="totalSize">0 KB</span>
+            </div>
+          </div>
+          <button id="clearDataBtn" class="danger"></button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <canvas id="gameCanvas"></canvas>
 
   <div id="gameOver">
     <h2 id="labelGameOver"></h2>
+    <div id="rankDisplay" class="rank-display">
+      <div class="rank-badge">
+        <span id="rankNumber" class="rank-number"></span>
+        <span id="rankText" class="rank-text"></span>
+      </div>
+    </div>
     <div class="results-container">
       <div class="table-container">
         <table id="scoreTable">
@@ -70,6 +103,28 @@
   </div>
 
   <div id="version">dev</div>
+
+  <!-- 確認ダイアログ -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <p id="confirmMessage"></p>
+      <div class="modal-buttons">
+        <button id="confirmOk" class="danger"></button>
+        <button id="confirmCancel"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 完了通知ダイアログ -->
+  <div id="alertModal" class="modal">
+    <div class="modal-content">
+      <p id="alertMessage"></p>
+      <div class="modal-buttons">
+        <button id="alertOk"></button>
+      </div>
+    </div>
+  </div>
+
   <script src="i18n.js"></script>
   <script src="scripts.js"></script>
 </body>

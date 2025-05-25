@@ -23,13 +23,56 @@ const detailView       = document.getElementById('detailView');
 const backBtn          = document.getElementById('backBtn');
 
 // デフォルト設定
+// ブラウザの言語設定を取得
+function detectLanguage() {
+  // サポートする言語のマッピング
+  const supportedLangs = {
+    'ja': 'ja',
+    'ja-jp': 'ja',
+    'en': 'en',
+    'en-us': 'en',
+    'en-gb': 'en',
+    'es': 'es',
+    'es-es': 'es',
+    'zh': 'zh',
+    'zh-cn': 'zh',
+    'zh-tw': 'zh',
+    'pt': 'pt',
+    'pt-br': 'pt',
+    'pt-pt': 'pt'
+  };
+
+  // 優先順位で言語をチェック
+  const languages = [
+    ...((navigator.languages || []).map(lang => lang.toLowerCase())), // ブラウザの言語リスト
+    (navigator.language || '').toLowerCase(),      // メイン言語
+    (navigator.browserLanguage || '').toLowerCase(),    // IEの言語
+    (navigator.userLanguage || '').toLowerCase(),      // ユーザー言語
+    (navigator.systemLanguage || '').toLowerCase()     // システム言語
+  ];
+
+  // サポートする言語を探す
+  for (const lang of languages) {
+    if (lang && supportedLangs[lang]) {
+      return supportedLangs[lang];
+    }
+    // xx-yy 形式の場合、xx部分だけでもチェック
+    const mainLang = lang.split('-')[0];
+    if (mainLang && supportedLangs[mainLang]) {
+      return supportedLangs[mainLang];
+    }
+  }
+
+  return 'en'; // デフォルトは英語
+}
+
 const DEFAULTS = {
   size: 20,
-  sensitivity: 1.00,
-  range: 0.6,
-  cursorColor: 'red',
+  sensitivity: 0.5,
+  range: 0.5,
+  cursorColor: '#ff0000',
   assist: false,
-  lang: 'ja'
+  lang: detectLanguage()
 };
 
 function saveConfig(cfg) {
@@ -38,7 +81,16 @@ function saveConfig(cfg) {
 
 function loadConfig() {
   const data = localStorage.getItem('gameConfig');
-  return data ? JSON.parse(data) : null;
+  const config = data ? JSON.parse(data) : null;
+  
+  // 設定がない場合はブラウザの言語を使用
+  if (!config) {
+    const detectedLang = detectLanguage();
+    console.log('検出された言語:', detectedLang);  // デバッグ用
+    return { ...DEFAULTS, lang: detectedLang };
+  }
+  
+  return config;
 }
 
 // 初期化処理
@@ -57,8 +109,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   const cfg = loadConfig() || DEFAULTS;
   // 多言語化初期化
   langSelect.value = cfg.lang;
-  populateOptions(cfg.lang);
-  translateUI(cfg.lang);
+  populateOptions(langSelect.value);
+  translateUI(langSelect.value);
 
   // 設定項目を初期化
   sizeSelect.value       = cfg.size;
@@ -66,6 +118,61 @@ window.addEventListener('DOMContentLoaded', async () => {
   rangeSelect.value      = cfg.range;
   cursorColorSelect.value= cfg.cursorColor;
   assistCheckbox.checked = cfg.assist;
+
+  // ストレージ情報を表示
+  updateStorageInfo();
+
+  // モーダル要素の参照
+  const confirmModal = document.getElementById('confirmModal');
+  const alertModal = document.getElementById('alertModal');
+  const confirmMessage = document.getElementById('confirmMessage');
+  const alertMessage = document.getElementById('alertMessage');
+  const confirmOkBtn = document.getElementById('confirmOk');
+  const confirmCancelBtn = document.getElementById('confirmCancel');
+  const alertOkBtn = document.getElementById('alertOk');
+
+  // モーダルのボタンテキストを設定
+  const t = texts[langSelect.value];
+  confirmOkBtn.textContent = t.confirmOk;
+  confirmCancelBtn.textContent = t.confirmCancel;
+  alertOkBtn.textContent = t.alertOk;
+
+  // データ消去ボタンの処理
+  document.getElementById('clearDataBtn').onclick = function() {
+    confirmMessage.textContent = t.clearConfirm;
+    confirmModal.style.display = 'block';
+  };
+
+  // 確認ダイアログのボタン処理
+  confirmOkBtn.onclick = function() {
+    confirmModal.style.display = 'none';
+    localStorage.removeItem('gameConfig');
+    localStorage.removeItem('highScores');
+    alertMessage.textContent = t.clearComplete;
+    alertModal.style.display = 'block';
+  };
+
+  confirmCancelBtn.onclick = function() {
+    confirmModal.style.display = 'none';
+  };
+
+  // 完了通知ダイアログのボタン処理
+  alertOkBtn.onclick = function() {
+    alertModal.style.display = 'none';
+    location.reload();
+  };
+
+  // モーダル外クリックで閉じる
+  window.onclick = function(event) {
+    if (event.target === confirmModal) {
+      confirmModal.style.display = 'none';
+    } else if (event.target === alertModal) {
+      alertModal.style.display = 'none';
+      if (alertMessage.textContent === t.clearComplete) {
+        location.reload();
+      }
+    }
+  };
 
   // 画面切替
   settingsDiv.style.display   = 'block';
@@ -78,6 +185,36 @@ langSelect.addEventListener('change', () => {
   const newLang = langSelect.value;
   populateOptions(newLang);
   translateUI(newLang);
+});
+
+// ストレージ使用量を計算して表示
+function updateStorageInfo() {
+  const t = texts[langSelect.value];
+  document.getElementById('labelStorageHeader').textContent = t.storageHeader;
+  document.getElementById('labelStorageExplain').textContent = t.storageExplain;
+  document.getElementById('labelStorageRanking').textContent = t.storageRanking;
+  document.getElementById('labelStorageConfig').textContent = t.storageConfig;
+  document.getElementById('labelStorageTotal').textContent = t.storageTotal;
+
+  // ストレージ使用量を計算
+  const highScores = localStorage.getItem('highScores') || '[]';
+  const config = localStorage.getItem('gameConfig') || '{}';  
+  const rankingSize = new Blob([highScores]).size;
+  const configSize = new Blob([config]).size;
+  const totalSize = rankingSize + configSize;
+
+  // KB単位で表示
+  document.getElementById('rankingSize').textContent = `${(rankingSize / 1024).toFixed(2)} KB`;
+  document.getElementById('configSize').textContent = `${(configSize / 1024).toFixed(2)} KB`;
+  document.getElementById('totalSize').textContent = `${(totalSize / 1024).toFixed(2)} KB`;
+}
+
+// 言語変更時にストレージ情報も更新
+langSelect.addEventListener('change', () => {
+  const newLang = langSelect.value;
+  populateOptions(newLang);
+  translateUI(newLang);
+  updateStorageInfo();
 });
 
 // Canvas リサイズ
@@ -106,6 +243,16 @@ const gameState = {
   cursorColor: 'red',
   assist: false,
 
+  // 補助線の固定位置
+  assistLine: {
+    x: 0,
+    y: 0,
+    isFixed: false
+  },
+  // カーソル軌跡
+  trail: [],
+  maxTrailLength: 50,
+
   // 状態管理
   isActive: false,
   animationFrameId: null,
@@ -115,15 +262,17 @@ const gameState = {
 
   // 状態リセット
   reset() {
-    this.score = 0;
-    this.startTime = performance.now();
-    this.mouse = { x: width/2, y: height/2 };
-    this.stats = [];
-    this.isActive = true;
+    this.isActive = false;
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
+    this.score = 0;
+    this.startTime = performance.now();
+    this.stats = [];
+    this.assistLine.isFixed = false;
+    this.trail = [];
+    this.isActive = true;
   },
 
   // ゲーム終了
@@ -138,9 +287,13 @@ const gameState = {
 
 // ターゲット出現
 function spawnTarget() {
-  gameState.targetX = Math.random() * width * gameState.spawnRange + (width * (1 - gameState.spawnRange) / 2);
-  gameState.targetY = Math.random() * height * gameState.spawnRange + (height * (1 - gameState.spawnRange) / 2);
+  const range = width * gameState.spawnRange;
+  gameState.targetX = Math.random() * range + (width - range) / 2;
+  gameState.targetY = Math.random() * range + (height - range) / 2;
   gameState.stats.push({ spawn: performance.now(), misses: 0 });
+  // 新しい的が出現したら補助線をリセット
+  gameState.assistLine.isFixed = false;
+  gameState.trail = [];
 }
 
 // ゲームオーバー処理
@@ -206,15 +359,15 @@ function gameOver() {
 }
 
 // スタート処理
-startBtn.addEventListener('click', () => {
+startBtn.addEventListener('click', e => {
   // 現在の設定を保存
   const cfg = {
-    size:        parseInt(sizeSelect.value, 10),
+    size: parseInt(sizeSelect.value, 10),
     sensitivity: parseFloat(sensitivityInput.value),
-    range:       parseFloat(rangeSelect.value),
+    range: parseFloat(rangeSelect.value),
     cursorColor: cursorColorSelect.value,
-    assist:      assistCheckbox.checked,
-    lang:        langSelect.value
+    assist: assistCheckbox.checked,
+    lang: langSelect.value
   };
   saveConfig(cfg);
 
@@ -228,6 +381,22 @@ startBtn.addEventListener('click', () => {
   // ゲーム状態をリセット
   gameState.reset();
 
+  // 現在のカーソル位置を取得
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+  gameState.mouse.x = mouseX;
+  gameState.mouse.y = mouseY;
+
+  // 最初の補助線の位置をカーソル位置に設定
+  if (gameState.assist) {
+    gameState.assistLine.x = mouseX;
+    gameState.assistLine.y = mouseY;
+    gameState.assistLine.isFixed = true;
+    // 最初のカーソル位置を軌跡の開始点として追加
+    gameState.trail = [{ x: mouseX, y: mouseY }];
+  }
+
   // ターゲットを生成
   spawnTarget();
 
@@ -237,7 +406,7 @@ startBtn.addEventListener('click', () => {
   gameOverDiv.style.display = 'none';
 
   // メインループを開始
-  gameState.animationFrameId = requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 });
 
 // 設定画面に戻る
@@ -311,14 +480,44 @@ function loop(now) {
   ctx.arc(gameState.targetX, gameState.targetY, 1.5, 0, Math.PI * 2);
   ctx.fill();
 
-  // 補助線
+  // 補助線と軌跡
   if (gameState.assist) {
+    // 補助線の固定位置を設定
+    if (!gameState.assistLine.isFixed) {
+      gameState.assistLine.x = gameState.mouse.x;
+      gameState.assistLine.y = gameState.mouse.y;
+      gameState.assistLine.isFixed = true;
+    }
+
+    // 補助線の描画
     ctx.strokeStyle = gameState.cursorColor;
     ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.5;
     ctx.beginPath();
-    ctx.moveTo(gameState.targetX, gameState.targetY);
-    ctx.lineTo(gameState.mouse.x, gameState.mouse.y);
+    ctx.moveTo(gameState.assistLine.x, gameState.assistLine.y);
+    ctx.lineTo(gameState.targetX, gameState.targetY);
     ctx.stroke();
+    ctx.globalAlpha = 1.0;
+
+    // カーソル軌跡の更新と描画
+    gameState.trail.push({ x: gameState.mouse.x, y: gameState.mouse.y });
+    if (gameState.trail.length > gameState.maxTrailLength) {
+      gameState.trail.shift();
+    }
+
+    if (gameState.trail.length > 1) {
+      ctx.strokeStyle = gameState.cursorColor;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      ctx.moveTo(gameState.trail[0].x, gameState.trail[0].y);
+      for (let i = 1; i < gameState.trail.length; i++) {
+        const point = gameState.trail[i];
+        ctx.lineTo(point.x, point.y);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1.0;
+    }
   }
 
   // カーソル描画
