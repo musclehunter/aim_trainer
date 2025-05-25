@@ -1,5 +1,13 @@
 # プロジェクトドキュメント
 
+## プロジェクト情報
+
+- **プロジェクト名**: Aim Trainer
+- **公開 URL**: [https://musclehunter.github.io/aim_trainer/](https://musclehunter.github.io/aim_trainer/)
+- **バージョン**: [version.js](../version.js) を参照
+
+## ドキュメントについて
+
 このディレクトリには、プロジェクトに関する重要なドキュメントが含まれています。
 
 ## ディレクトリ構造
