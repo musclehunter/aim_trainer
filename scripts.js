@@ -333,19 +333,23 @@ function loop(now) {
 
   // HUD描画
   const t = texts[langSelect.value];
-  const lastStat = gameState.stats.length ? gameState.stats[gameState.stats.length - 1] : 
-    { spawn: gameState.startTime, hit: gameState.startTime, misses: 0 };
-  const lastTime = ((lastStat.hit || lastStat.spawn) - lastStat.spawn) / 1000;
+
+  // 前回時間の計算（最後にヒットした的の情報を使用）
+  const lastHitStat = gameState.stats.slice().reverse().find(s => s.hit);
+  const lastTime = lastHitStat ? (lastHitStat.hit - lastHitStat.spawn) / 1000 : 0;
   const lastVal = lastTime.toFixed(3) + 's';
-  const currRate = (gameState.score + lastStat.misses) ? 
-    ((gameState.score / (gameState.score + lastStat.misses) * 100).toFixed(1) + '%') : '0.0%';
+
+  // 全体のヒット率を計算
+  const totalShots = gameState.stats.reduce((total, stat) => total + (stat.hit ? 1 : 0) + stat.misses, 0);
+  const totalHits = gameState.stats.filter(stat => stat.hit).length;
+  const hitRate = totalShots ? ((totalHits / totalShots) * 100).toFixed(1) + '%' : '0.0%';
 
   ctx.fillStyle = '#fff';
   ctx.font = '20px sans-serif';
   ctx.fillText(`${t.score}: ${gameState.score}`, 10, 30);
   ctx.fillText(`${t.time}: ${(gameState.timeLimit - elapsed).toFixed(1)}s`, 10, 60);
   ctx.fillText(`${t.last}: ${lastVal}`, 10, 90);
-  ctx.fillText(`${t.hitRate}: ${currRate}`, 10, 120);
+  ctx.fillText(`${t.hitRate}: ${hitRate}`, 10, 120);
 
   // 次のフレームをリクエスト
   if (gameState.isActive) {
