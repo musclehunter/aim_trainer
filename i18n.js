@@ -21,31 +21,31 @@ const availableLangs = Object.keys(langNames);
 const texts = {
   ja: {
     sizes: ['3','8','12','16','20'], ranges: ['狭い','やや狭い','標準','やや広い','広い'], colors: ['赤','白','青','黄色','紫','緑'],
-    settings: 'ゲーム設定', loadPrev: '前回設定を読み込む', size: 'ターゲットサイズ(px)', sensitivity: '感度(0.01〜1.00)',
+    settings: 'ゲーム設定', size: 'ターゲットサイズ(px)', sensitivity: '感度(0.01〜1.00)',
     range: '出現範囲', cursorColor: 'カーソル色', assist: '補助: 的とカーソルを直線で結ぶ', startBtn: 'スタート',
     gameOver: 'ゲーム終了', rank: '順位', score: 'スコア', avgTime: '平均時間(s)', misses: 'ミス', hitRate: 'ヒット率(%)',
     date: '日時', clickRow: '行をクリックして詳細を表示', backToSettings: '設定に戻る', detailHeader: '詳細', target: '的', time: '残り時間(s)', last: '前回時間'
   },
   en: {
     sizes: ['3','8','12','16','20'], ranges: ['Narrow','Somewhat Narrow','Standard','Somewhat Wide','Wide'], colors: ['Red','White','Blue','Yellow','Purple','Lime'],
-    settings: 'Game Settings', loadPrev: 'Load Previous', size: 'Target Size(px)', sensitivity: 'Sensitivity(0.01-1.00)',
+    settings: 'Game Settings', size: 'Target Size(px)', sensitivity: 'Sensitivity(0.01-1.00)',
     range: 'Spawn Range', cursorColor: 'Cursor Color', assist: 'Assist: Draw line to target', startBtn: 'Start',
     gameOver: 'Game Over', rank: 'Rank', score: 'Score', avgTime: 'Avg Time(s)', misses: 'Misses', hitRate: 'Hit Rate(%)',
     date: 'Date', clickRow: 'Click a row to view details', backToSettings: 'Back to Settings', detailHeader: 'Details', target: 'Target', time: 'Time(s)', last: 'Last'
   },
   es: {
     sizes: ['3','8','12','16','20'], ranges: ['Estrecho','Algo estrecho','Estándar','Algo amplio','Amplio'], colors: ['Rojo','Blanco','Azul','Amarillo','Púrpura','Verde'],
-    settings: 'Configuración', loadPrev: 'Cargar anterior', size: 'Tamaño(px)', sensitivity: 'Sensibilidad(0.01-1.00)', range: 'Rango', cursorColor: 'Color del cursor', assist: 'Asistencia: línea al objetivo', startBtn: 'Comenzar',
+    settings: 'Configuración', size: 'Tamaño(px)', sensitivity: 'Sensibilidad(0.01-1.00)', range: 'Rango', cursorColor: 'Color del cursor', assist: 'Asistencia: línea al objetivo', startBtn: 'Comenzar',
     gameOver: 'Fin del juego', rank: 'Posición', score: 'Puntuación', avgTime: 'Tiempo promedio(s)', misses: 'Fallos', hitRate: 'Tasa de acierto(%)', date: 'Fecha', clickRow: 'Haga clic en una filaで詳細を表示', backToSettings: 'Volver a ajustes', detailHeader: 'Detalles', target: 'Objetivo', time: 'Tiempo(s)', last: 'Último'
   },
   zh: {
     sizes: ['3','8','12','16','20'], ranges: ['狭','略狭','标准','略宽','宽'], colors: ['红','白','蓝','黄','紫','绿'],
-    settings: '游戏设置', loadPrev: '加载上次', size: '目标大小(px)', sensitivity: '灵敏度(0.01-1.00)', range: '出现范围', cursorColor: '光标颜色', assist: '辅助: 目标连线', startBtn: '开始',
+    settings: '游戏设置', size: '目标大小(px)', sensitivity: '灵敏度(0.01-1.00)', range: '出现范围', cursorColor: '光标颜色', assist: '辅助: 目标连线', startBtn: '开始',
     gameOver: '游戏结束', rank: '排名', score: '得分', avgTime: '平均时间(s)', misses: '未命中', hitRate: '命中率(%)', date: '日期', clickRow: '点击行查看详情', backToSettings: '返回设置', detailHeader: '详情', target: '目标', time: '时间(s)', last: '上次'
   },
   pt: {
     sizes: ['3','8','12','16','20'], ranges: ['Estreito','Um pouco estreito','Padrão','Um pouco amplo','Amplo'], colors: ['Vermelho','Branco','Azul','Amarelo','Roxo','Verde'],
-    settings: 'Configurações', loadPrev: 'Carregar anterior', size: 'Tamanho(px)', sensitivity: 'Sensibilidade(0.01-1.00)', range: 'Alcance', cursorColor: 'Cor do cursor', assist: 'Assistência: linha para alvo', startBtn: 'Iniciar',
+    settings: 'Configurações', size: 'Tamanho(px)', sensitivity: 'Sensibilidade(0.01-1.00)', range: 'Alcance', cursorColor: 'Cor do cursor', assist: 'Assistência: linha para alvo', startBtn: 'Iniciar',
     gameOver: 'Fim de jogo', rank: 'Ranking', score: 'Pontuação', avgTime: 'Tempo médio(s)', misses: 'Erros', hitRate: 'Taxa de acerto(%)', date: 'Data', clickRow: 'Clique na linha para detalhes', backToSettings: 'Voltar às Configurações', detailHeader: 'Detalhes', target: 'Alvo', time: 'Tempo(s)', last: 'Último'
   }
 };
@@ -72,7 +72,6 @@ function populateOptions(lang) {
 function translateUI(lang) {
   const t = texts[lang];
   document.getElementById('labelSettings').textContent    = t.settings;
-  document.getElementById('labelLoadPrev').textContent    = t.loadPrev;
   document.getElementById('labelSize').textContent        = t.size;
   document.getElementById('labelSensitivity').textContent = t.sensitivity;
   document.getElementById('labelRange').textContent       = t.range;
