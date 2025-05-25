@@ -69,9 +69,9 @@ function detectLanguage() {
 const DEFAULTS = {
   size: 20,
   sensitivity: 0.5,
-  range: 0.5,
-  cursorColor: '#ff0000',
-  assist: false,
+  range: '0.6',
+  cursorColor: 'red',
+  assistance: true,
   lang: detectLanguage()
 };
 
@@ -83,11 +83,19 @@ function loadConfig() {
   const data = localStorage.getItem('gameConfig');
   const config = data ? JSON.parse(data) : null;
   
-  // 設定がない場合はブラウザの言語を使用
+  // 設定がない場合はデフォルト設定を使用
   if (!config) {
-    const detectedLang = detectLanguage();
-    console.log('検出された言語:', detectedLang);  // デバッグ用
-    return { ...DEFAULTS, lang: detectedLang };
+    const defaultConfig = {
+      ...DEFAULTS,
+      lang: detectLanguage(),
+      assistance: true
+    };
+    return defaultConfig;
+  }
+  
+  // assistance が未設定の場合はデフォルトを true に
+  if (config.assistance === undefined) {
+    config.assistance = true;
   }
   
   return config;
@@ -206,6 +214,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     confirmModal.style.display = 'none';
     localStorage.removeItem('gameConfig');
     localStorage.removeItem('highScores');
+    // デフォルト設定を適用
+    const defaultConfig = {
+      ...DEFAULTS,
+      lang: detectLanguage(),
+      assistance: true
+    };
+    localStorage.setItem('gameConfig', JSON.stringify(defaultConfig));
     alertMessage.textContent = t.clearComplete;
     alertModal.style.display = 'block';
   };
