@@ -46,8 +46,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   // バージョン情報の読み込み
   let version = 'dev';
   try {
-    version = await fetch('version.txt').then(r => r.text());
-    version = version.trim();
+    const versionModule = await import('./version.js');
+    version = versionModule.VERSION;
     document.title = `Aim Trainer v${version}`;
     document.getElementById('version').textContent = `v${version}`;
   } catch (e) {
