@@ -94,6 +94,54 @@ function loadConfig() {
 }
 
 // 初期化処理
+// タブの切り替え処理
+function switchTab(tabId) {
+  // ボタンのアクティブ状態を切り替え
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+
+  // コンテンツの表示を切り替え
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  document.getElementById(tabId.replace('Tab', 'Content')).classList.add('active');
+
+  // ランキングタブの場合、ランキングを表示
+  if (tabId === 'rankingTab') {
+    displayRanking();
+  }
+}
+
+// ランキング表示処理
+function displayRanking(currentRank = -1) {
+  const t = texts[langSelect.value];
+  const hs = JSON.parse(localStorage.getItem('highScores') || '[]');
+  const scoreTableBody = document.getElementById('scoreTableBody');
+  scoreTableBody.innerHTML = '';
+  detailView.innerHTML = `<p>${t.clickRow}</p>`;
+
+  hs.forEach((e, i) => {
+    const tr = document.createElement('tr');
+    if (i === currentRank) {
+      tr.classList.add('current-score');
+    }
+
+    tr.innerHTML =
+      `<td>${i+1}</td><td>${e.score}</td><td>${e.avgTime.toFixed(2)}</td>` +
+      `<td>${e.misses}</td><td>${e.hitRate.toFixed(1)}</td>` +
+      `<td>${new Date(e.time).toLocaleString()}</td>`;
+    if (e.details && e.details.length) {
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', () => {
+        detailView.innerHTML = `<h3>${t.detailHeader}</h3><ul>` +
+          e.details.map((d, j) => {
+            const dt = ((d.hit || d.spawn) - d.spawn) / 1000;
+            return `<li>${t.target} ${j+1}: time=${dt.toFixed(3)}s, misses=${d.misses}</li>`;
+          }).join('') + '</ul>';
+      });
+    }
+    scoreTableBody.appendChild(tr);
+  });
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   // バージョン情報の読み込み
   let version = 'dev';
@@ -136,6 +184,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   confirmOkBtn.textContent = t.confirmOk;
   confirmCancelBtn.textContent = t.confirmCancel;
   alertOkBtn.textContent = t.alertOk;
+
+  // タブの初期化
+  const settingsTab = document.getElementById('settingsTab');
+  const rankingTab = document.getElementById('rankingTab');
+  settingsTab.textContent = texts[langSelect.value].settingsTab;
+  rankingTab.textContent = texts[langSelect.value].rankingTab;
+
+  // タブのクリックイベント
+  settingsTab.addEventListener('click', () => switchTab('settingsTab'));
+  rankingTab.addEventListener('click', () => switchTab('rankingTab'));
 
   // データ消去ボタンの処理
   document.getElementById('clearDataBtn').onclick = function() {
@@ -215,6 +273,15 @@ langSelect.addEventListener('change', () => {
   populateOptions(newLang);
   translateUI(newLang);
   updateStorageInfo();
+
+  // タブ名を更新
+  settingsTab.textContent = texts[newLang].settingsTab;
+  rankingTab.textContent = texts[newLang].rankingTab;
+
+  // ランキングタブがアクティブなら再表示
+  if (rankingTab.classList.contains('active')) {
+    displayRanking();
+  }
 
   // 保存されている設定を再適用
   const cfg = loadConfig();
@@ -311,19 +378,12 @@ function gameOver() {
   // ゲーム状態を終了に設定
   gameState.end();
 
-  // 結果計算
   const t = texts[langSelect.value];
-  const missTotal    = gameState.stats.reduce((a, c) => a + c.misses, 0);
-  const successCount = gameState.stats.filter(c => typeof c.hit === 'number').length;
-  const totalTime    = gameState.stats.reduce((a, c) => a + (((typeof c.hit === 'number' ? c.hit : c.spawn) - c.spawn)), 0);
-  const avgTime      = successCount ? totalTime / 1000 / successCount : 0;
-  const hitRate      = (successCount + missTotal) ? (successCount / (successCount + missTotal) * 100) : 0;
+  const avgTime = gameState.stats.reduce((sum, s) => sum + ((s.hit || s.spawn) - s.spawn), 0) / 1000 / gameState.stats.length;
+  const missTotal = gameState.stats.reduce((sum, s) => sum + s.misses, 0);
+  const hitRate = gameState.stats.length / (gameState.stats.length + missTotal) * 100;
 
-  // 画面切り替え
-  canvas.style.display = 'none';
-  settingsDiv.style.display = 'none';
-  gameOverDiv.style.display = 'block';
-
+  // スコアを保存
   let hs = JSON.parse(localStorage.getItem('highScores') || '[]');
   const entry = { 
     score: gameState.score, 
@@ -335,39 +395,19 @@ function gameOver() {
   };
   hs.push(entry);
   hs.sort((a,b) => b.score - a.score);
-  hs = hs.slice(0, 10); // 上位10件のみを保持
+  if (hs.length > 10) hs.length = 10;
   localStorage.setItem('highScores', JSON.stringify(hs));
 
-  const rank = hs.findIndex(e => e.time === entry.time);
-  const scoreTableBody = document.getElementById('scoreTableBody');
-  scoreTableBody.innerHTML = '';
-  detailView.innerHTML = `<p>${t.clickRow}</p>`;
-
-  console.log('ランキング表示:', hs.length, '件');
-  hs.forEach((e, i) => {
-    const tr = document.createElement('tr');
-    if (i === rank) tr.classList.add('current-score');
-    tr.innerHTML =
-      `<td>${i+1}</td><td>${e.score}</td><td>${e.avgTime.toFixed(2)}</td>` +
-      `<td>${e.misses}</td><td>${e.hitRate.toFixed(1)}</td>` +
-      `<td>${new Date(e.time).toLocaleString()}</td>`;
-    if (e.details && e.details.length) {
-      tr.style.cursor = 'pointer';
-      tr.addEventListener('click', () => {
-        detailView.innerHTML = `<h3>${t.detailHeader}</h3><ul>` +
-          e.details.map((d, j) => {
-            const dt = ((d.hit || d.spawn) - d.spawn) / 1000;
-            return `<li>${t.target} ${j+1}: time=${dt.toFixed(3)}s, misses=${d.misses}</li>`;
-          }).join('') + '</ul>';
-      });
-    }
-    scoreTableBody.appendChild(tr);
-  });
-
-  // 画面切り替え
-  canvas.style.display = 'none';
-  settingsDiv.style.display = 'none';
-  gameOverDiv.style.display = 'block';
+  // ランクを確認
+  const rank = hs.findIndex(e => e === entry);
+  
+  // 結果を表示
+  settings.style.display = '';
+  canvas.style.display = 'none'; // キャンバスを非表示
+  document.body.style.overflow = ''; // overflow設定をリセット
+  switchTab('rankingTab'); // ランキングタブをアクティブに
+  displayRanking(rank); // 現在のスコアを強調表示
+  gameState = null;
 }
 
 // スタート処理
@@ -414,8 +454,9 @@ startBtn.addEventListener('click', e => {
 
   // 画面切り替え
   settingsDiv.style.display = 'none';
-  canvas.style.display = 'block';
+  canvas.style.display = 'block'; // キャンバスを表示
   gameOverDiv.style.display = 'none';
+  document.body.style.overflow = 'hidden'; // ゲーム中はスクロールを無効化
 
   // メインループを開始
   requestAnimationFrame(loop);
