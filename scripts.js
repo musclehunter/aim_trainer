@@ -325,13 +325,15 @@ function gameOver() {
   };
   hs.push(entry);
   hs.sort((a,b) => b.score - a.score);
-  if (hs.length > 10) hs.length = 10;
+  hs = hs.slice(0, 10); // 上位10件のみを保持
   localStorage.setItem('highScores', JSON.stringify(hs));
 
   const rank = hs.findIndex(e => e.time === entry.time);
+  const scoreTableBody = document.getElementById('scoreTableBody');
   scoreTableBody.innerHTML = '';
   detailView.innerHTML = `<p>${t.clickRow}</p>`;
 
+  console.log('ランキング表示:', hs.length, '件');
   hs.forEach((e, i) => {
     const tr = document.createElement('tr');
     if (i === rank) tr.style.background = '#444';
