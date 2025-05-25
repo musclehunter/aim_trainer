@@ -35,10 +35,12 @@
                 <h2 id="labelSettings"></h2>
               </div>
               <div class="header-right">
-                <label class="lang-select"><span id="labelLangLabel">Language</span>
+                <label class="lang-select">
+                  <span id="labelLangLabel">Language</span>
                   <select id="langSelect" data-list="true"><option value="ja">日本語</option><option value="en">English</option><option value="es">Español</option><option value="zh">中文</option><option value="pt">Português</option></select>
                 </label>
-                <button id="startBtn" class="start-button"></button>
+                <button id="startBtn" class="start-button" data-i18n="startButton"></button>
+                <button id="bgmButton" class="bgm-button" data-i18n="bgmPlay"></button>
               </div>
             </div>
             <div class="settings-form">
@@ -54,7 +56,10 @@
               <label><span id="labelCursorColor"></span>
                 <select id="cursorColorSelect" data-list="true"></select>
               </label>
-              <label><input type="checkbox" id="assistCheckbox"> <span id="labelAssist"></span></label>
+              <label class="settings-item">
+                <input type="checkbox" id="assistCheckbox">
+                <span id="labelAssist"></span>
+              </label>
             </div>
           </div>
           <div class="settings-side">

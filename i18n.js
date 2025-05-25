@@ -20,6 +20,11 @@ const availableLangs = Object.keys(langNames);
 // 各言語向けUI文言定義
 window.texts = {
   ja: {
+    start: 'スタート',
+    bgm: 'BGM',
+    startButton: 'ゲーム開始',
+    bgmPlay: 'BGM 再生',
+    bgmStop: 'BGM 停止',
     rankFirst: '頂点',
     rankSecond: '準頂点',
     rankThird: '第3位',
@@ -45,6 +50,11 @@ window.texts = {
     date: '日時', clickRow: '行をクリックして詳細を表示', backToSettings: '設定に戻る', detailHeader: '詳細', target: '的', time: '残り時間(s)', last: '前回時間'
   },
   en: {
+    start: 'Start',
+    bgm: 'BGM',
+    startButton: 'Start Game',
+    bgmPlay: 'Play BGM',
+    bgmStop: 'Stop BGM',
     rankFirst: '1st Place',
     rankSecond: '2nd Place',
     rankThird: '3rd Place',
@@ -160,8 +170,19 @@ function populateOptions(lang) {
  * UIラベルを翻訳（言語ラベルは固定英語）
  * @param {string} lang 言語コード
  */
-function translateUI(lang) {
-  const t = texts[lang];
+function translateUI(lang = null) {
+  // 言語が指定されていない場合は現在の選択言語を使用
+  const currentLang = lang || langSelect.value;
+  const t = texts[currentLang];
+
+  // data-i18n属性を持つ要素を翻訳
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    if (t[key]) {
+      element.textContent = t[key];
+    }
+  });
+
   // メイン画面
   document.getElementById('labelSettings').textContent    = t.settings;
   document.getElementById('labelSize').textContent        = t.size;
@@ -172,7 +193,6 @@ function translateUI(lang) {
   // labelLangLabel は固定英語
 
   // ボタン類
-  document.getElementById('startBtn').textContent         = t.startBtn;
   document.getElementById('clearDataBtn').textContent     = t.clearData;
   document.getElementById('backBtn').textContent          = t.backToSettings;
 

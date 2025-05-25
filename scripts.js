@@ -21,6 +21,27 @@ const gameOverDiv      = document.getElementById('gameOver');
 const scoreTableBody   = document.querySelector('#scoreTable tbody');
 const detailView       = document.getElementById('detailView');
 const backBtn          = document.getElementById('backBtn');
+const bgmButton        = document.getElementById('bgmButton');
+
+// BGM設定
+const bgm = new Audio('bgm/InfiniteFocus.mp3');
+bgm.loop = true;
+let isBgmPlaying = false;
+
+// BGMの再生/停止を切り替え
+function toggleBgm() {
+  const t = texts[langSelect.value];
+  if (isBgmPlaying) {
+    bgm.pause();
+    bgmButton.textContent = t.bgmPlay;
+    bgmButton.classList.remove('playing');
+  } else {
+    bgm.play();
+    bgmButton.textContent = t.bgmStop;
+    bgmButton.classList.add('playing');
+  }
+  isBgmPlaying = !isBgmPlaying;
+}
 
 // デフォルト設定
 // ブラウザの言語設定を取得
@@ -151,6 +172,9 @@ function displayRanking(currentRank = -1) {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // ボタンの初期化
+  translateUI();
+  bgmButton.addEventListener('click', toggleBgm);
   // バージョン情報の読み込み
   let version = 'dev';
   try {

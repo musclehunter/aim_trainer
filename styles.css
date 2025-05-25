@@ -135,9 +135,20 @@ html, body {
 
 .header-right {
   display: flex;
+  align-items: center;
   gap: 15px;
-  align-items: stretch;
-  height: 38px;
+}
+
+.header-right .bgm-button,
+.header-right .start-button {
+  padding: 8px 16px;
+  font-size: 0.9em;
+  width: 120px;
+  height: 36px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .lang-select {
@@ -160,15 +171,10 @@ html, body {
 
 .start-button {
   background: #4CAF50;
-  color: white;
-  padding: 0 20px;
   border: none;
-  border-radius: 4px;
+  color: white;
   cursor: pointer;
-  transition: background-color 0.3s;
-  height: 38px;
-  margin: 0;
-  line-height: 38px;
+  transition: all 0.3s;
 }
 
 .start-button:hover {
@@ -527,4 +533,25 @@ tr.current-score:hover {
 
 #detailView li {
   margin-bottom: 4px;
+}
+
+#detailView .settings-item {
+  margin-bottom: 10px;
+}
+
+.bgm-button {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.5);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.bgm-button:hover {
+  background: rgba(76, 175, 80, 0.3);
+}
+
+.bgm-button.playing {
+  background: rgba(76, 175, 80, 0.4);
+  border-color: rgba(76, 175, 80, 0.8);
 }
