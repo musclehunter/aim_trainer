@@ -405,11 +405,23 @@ const gameState = {
 function spawnTarget() {
   const rangeValue = parseInt(gameState.spawnRange);
   // 横幅はrangeValueをそのまま使用し、縦幅は768pxを最大として比率計算
-  const rangeX = rangeValue;
-  const rangeY = Math.min(768, Math.floor(rangeValue * (768/1024)));
+  // ただし、ウィンドウサイズより大きくならないように制限
+  const rangeX = Math.min(rangeValue, width);
+  const rangeY = Math.min(
+    Math.min(768, Math.floor(rangeValue * (768/1024))), // 最大768pxの制限
+    height // ウィンドウの高さの制限
+  );
+
   // 画面中央を基準に、範囲内にランダムに配置
-  gameState.targetX = Math.random() * rangeX + (width - rangeX) / 2;
-  gameState.targetY = Math.random() * rangeY + (height - rangeY) / 2;
+  // ただし、的が必ず画面内に収まるように調整
+  const halfWidth = width / 2;
+  const halfHeight = height / 2;
+  const halfRangeX = rangeX / 2;
+  const halfRangeY = rangeY / 2;
+
+  // 画面内に収まるように座標を計算
+  gameState.targetX = Math.random() * rangeX + (halfWidth - halfRangeX);
+  gameState.targetY = Math.random() * rangeY + (halfHeight - halfRangeY);
   gameState.stats.push({ spawn: performance.now(), misses: 0 });
   // 新しい的が出現したら補助線をリセット
   gameState.assistLine.isFixed = false;
