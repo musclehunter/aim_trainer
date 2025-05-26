@@ -90,7 +90,7 @@ function detectLanguage() {
 const DEFAULTS = {
   size: 20,
   sensitivity: 0.5,
-  range: '0.6',
+  range: '250',  // 250x250pxが最小範囲
   cursorColor: 'red',
   assistance: true,
   lang: detectLanguage()
@@ -403,9 +403,13 @@ const gameState = {
 
 // ターゲット出現
 function spawnTarget() {
-  const range = width * gameState.spawnRange;
-  gameState.targetX = Math.random() * range + (width - range) / 2;
-  gameState.targetY = Math.random() * range + (height - range) / 2;
+  const rangeValue = parseInt(gameState.spawnRange);
+  // 横幅はrangeValueをそのまま使用し、縦幅は768pxを最大として比率計算
+  const rangeX = rangeValue;
+  const rangeY = Math.min(768, Math.floor(rangeValue * (768/1024)));
+  // 画面中央を基準に、範囲内にランダムに配置
+  gameState.targetX = Math.random() * rangeX + (width - rangeX) / 2;
+  gameState.targetY = Math.random() * rangeY + (height - rangeY) / 2;
   gameState.stats.push({ spawn: performance.now(), misses: 0 });
   // 新しい的が出現したら補助線をリセット
   gameState.assistLine.isFixed = false;

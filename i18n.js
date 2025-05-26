@@ -158,7 +158,7 @@ window.texts = {
 function populateOptions(lang) {
   const t = texts[lang];
   document.getElementById('sizeSelect').innerHTML = t.sizes.map(v => `<option value="${v}">${v}</option>`).join('');
-  document.getElementById('rangeSelect').innerHTML = t.ranges.map((label,i) => `<option value="${[0.2,0.4,0.6,0.8,1.0][i]}">${label}</option>`).join('');
+  document.getElementById('rangeSelect').innerHTML = t.ranges.map((label,i) => `<option value="${[250,400,600,800,1024][i]}">${label}</option>`).join('');
   document.getElementById('cursorColorSelect').innerHTML = t.colors.map((label,i) => `<option value="${['red','white','blue','yellow','purple','lime'][i]}">${label}</option>`).join('');
   // 言語選択プルダウン
   document.getElementById('langSelect').innerHTML = availableLangs.map(code => `<option value="${code}">${langNames[code]}</option>`).join('');
